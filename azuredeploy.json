@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "variables": {
+    "roleDefinitionId": {
+      "MonitoringReader": "43d0d8ad-25c7-4714-9337-8ba259a9fe05",
+      "StorageBlobDataReader": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
+    },
+    "PrincipalIdInvictus": "653ae2c3-d87e-4cff-89ff-ef715d6991ae"
+  },
+  "resources": [
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(deployment().name, variables('PrincipalIdInvictus'), variables('roleDefinitionId').MonitoringReader)]",
+            "properties": {
+                "principalId": "[variables('PrincipalIdInvictus')]",
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionId').MonitoringReader)]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(deployment().name, variables('PrincipalIdInvictus'), variables('roleDefinitionId').StorageBlobDataReader)]",
+            "properties": {
+                "principalId": "[variables('PrincipalIdInvictus')]",
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionId').StorageBlobDataReader)]",
+                "principalType": "ServicePrincipal",
+                "condition": "((!(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read'})) OR (@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:name] StringLikeIgnoreCase 'insights-logs-*' OR @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:name] StringEqualsIgnoreCase 'insights-activity-logs'))",
+                "conditionVersion": "2.0"
+            }
+        }
+    ]
+}
